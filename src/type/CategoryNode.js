@@ -1,5 +1,5 @@
 export class CategoryNode{
-    constructor(id, pid, name, desc, seqOrder, data){
+    constructor(id, pid, name, desc, seqOrder){
         this.id=id;
         this.pid=pid;
         this.name=name;
@@ -92,3 +92,28 @@ export class CategoryNode{
     }
 }
 
+export function makeRootCategoryNode(data){
+    if(!Array.isArray(data))
+        return null;
+    
+    const rootId = `root${Date.now()}`;
+        
+    const root = new CategoryNode(null,null,rootId,null,null);
+
+    const nodes = data.map(data => new CategoryNode(data.id, data.pid, data.name, data.desc, data.seqOrder));
+
+    nodes.forEach(node => {
+        if(!node.pid){
+            root.children.push(node)
+        }
+        else{
+            nodes.forEach(otherNode => {
+                if(node.pid === otherNode.id){
+                    node.parentNode = otherNode;
+                    otherNode.children.push(node);
+                }
+            });
+        }
+    });
+    return root;
+}
