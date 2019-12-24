@@ -1,12 +1,29 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import {dummyData} from "./dummyData";
+import {CategoryNode} from "./type/CategoryNode";
 
-ReactDOM.render(<App />, document.getElementById('root'));
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const root = new CategoryNode(null,null,"root",null,null);
+
+const nodes = dummyData.map(data => new CategoryNode(data.id, data.pid, data.name, data.desc, data.seqOrder));
+
+nodes.forEach(node => {
+    if(!node.pid){
+        root.children.push(node)
+    }
+    else{
+        nodes.forEach(otherNode => {
+            if(node.pid === otherNode.id){
+                node.parentNode = otherNode;
+                otherNode.children.push(node);
+            }
+        });
+    }
+});
+
+root.printDepthFirstOrder();
+ console.log("======================================");
+//root.printBreathFirstOrder();
+let id="191224000007";
+console.log(root.findDepthFirstOrder(id));
+console.log(root.findBreathFirstOrder(id));
+
