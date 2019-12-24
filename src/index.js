@@ -22,8 +22,14 @@ nodes.forEach(node => {
 
 root.printDepthFirstOrder();
  console.log("======================================");
-//root.printBreathFirstOrder();
-let id="191224000007";
+root.printBreathFirstOrder();
+let id="191224000009"; //토끼파
+let foundNode=root.findDepthFirstOrder(id);
+console.log("======================================");
+foundNode.printDepthFirstOrder();
+console.log("======================================");
+foundNode.printBreathFirstOrder();
+console.log("======================================");
 console.log(root.findDepthFirstOrder(id));
 console.log(root.findBreathFirstOrder(id));
 
