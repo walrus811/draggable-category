@@ -7,21 +7,32 @@ import './css/style.css'
 const root = makeRootCategoryNode(dummyData);
 root.printDepthFirstOrder();
 
-class Node extends React.Component {
+class Node extends React.Component{
+    constructor(props){
+        super(props);
+        this.handleClick=this.handleClick.bind(this);
+    }
+
+    handleClick(e){
+        e.stopPropagation();
+        let {data1,data2}=this.props;
+        alert(data1);
+    }
+    render() {
+        let {data1,data2}=this.props;
+        return <li draggable onClick={this.handleClick}>{data1}{data2}</li>
+      }
+}
+
+class RootNode extends React.Component {
     renderNode=(nodeData)=>{
         if (nodeData.children.length>0) {
-            return (
-                <li>{nodeData.name}
-                    <ul>
-                    {nodeData.children.map(item => {
-                        return this.renderNode(item);
-                    })}
-                    </ul>
-                </li>
+            return ( 
+                <Node data1={nodeData.name} data2={<ul>{nodeData.children.map(item=> this.renderNode(item))}</ul>}/>
             );
         }
         else {
-            return <li >{nodeData.name}</li>;
+            return <Node data1={nodeData.name}/>;
         }
     }
 
@@ -36,7 +47,7 @@ class NodeTree extends React.Component{
         let {rootData}=this.props;
         if(!rootData)
             return null;
-        return <ul>{rootData.children.map(rootNode=><Node nodeData={rootNode}/>)}</ul>;
+        return <ul>{rootData.children.map(rootNode=><RootNode nodeData={rootNode}/>)}</ul>;
       }
 }
 
@@ -51,7 +62,6 @@ class DraggableCategory extends React.Component {
         );
     }
 }
-
 
 ReactDOM.render(
     <DraggableCategory root={root} />,
