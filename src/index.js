@@ -18,6 +18,7 @@ class Node extends React.Component{
         let {data1,data2}=this.props;
         alert(data1);
     }
+    
     render() {
         let {data1,data2}=this.props;
         return <li draggable onClick={this.handleClick}>{data1}{data2}</li>
