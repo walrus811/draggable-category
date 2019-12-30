@@ -7,7 +7,8 @@ import { node } from "prop-types";
 
 const root = makeRootCategoryNode(dummyData);
 root.printDepthFirstOrder();
-
+//Node에서 루트로 거슬러올라가 해당 노드 정보 반환이 필요함,
+//해당 함수는 prop으로 받는 걸로 설정
 class Node extends React.Component{
     constructor(props){
         super(props);
@@ -41,7 +42,8 @@ class Node extends React.Component{
         e.stopPropagation();
         var data = e.dataTransfer.getData("nodeId"); 
         console.log("handleDrop");
-        console.log(data);
+        var foundOne = root.findDepthFirstOrder(data);
+        alert(foundOne.name+" is dropped! on "+this.props.nodeData.name);
       }
       
     handleOnDragOver(e){
