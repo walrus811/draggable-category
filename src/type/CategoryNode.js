@@ -146,6 +146,21 @@ class CategoryNode {
         }
         return result;
     }
+
+    getRoot(){
+        let currentNode = this;
+        for(; currentNode.parentNode; currentNode=currentNode.parentNode){;}
+        return currentNode;
+    }
+    
+    isAncestor(node){
+        let currentNode = this;
+        for(; currentNode.parentNode; currentNode=currentNode.parentNode){
+            if(node.id == currentNode.id)
+                return true;
+        }
+        return false;
+    }
 }
 
 function makeRootCategoryNode(data) {
@@ -163,6 +178,7 @@ function makeRootCategoryNode(data) {
 
     nodes.forEach(node => {
         if (!node.pid) {
+            node.parentNode = root;
             root.children.push(node)
         } else {
             nodes.forEach(otherNode => {
