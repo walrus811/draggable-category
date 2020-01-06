@@ -3,26 +3,43 @@ import { CategoryNode, makeRootCategoryNode } from "./type/CategoryNode";
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './css/style.css'
-import { node } from "prop-types";
+import { node, array } from "prop-types";
 
 const root = makeRootCategoryNode(dummyData);
-root.printDepthFirstOrder();
+//root.printDepthFirstOrder();
+
 //Node에서 루트로 거슬러올라가 해당 노드 정보 반환이 필요함,
 //해당 함수는 prop으로 받는 걸로 설정
 class Node extends React.Component{
     constructor(props){
         super(props);
         this.handleClick=this.handleClick.bind(this);
+        this.handleDragEnd = this.handleDragEnd.bind(this);
+        this.handleDragEnter = this.handleDragEnter.bind(this);
+        this.handleDragLeave = this.handleDragLeave.bind(this);
+        this.handleOnDragOver=this.handleDragOver.bind(this);
         this.handleDragStart=this.handleDragStart.bind(this);
         this.handleDrop=this.handleDrop.bind(this);
-        this.handleOnDragOver=this.handleOnDragOver.bind(this);
-        this.handleDragEnd= this.handleDragEnd.bind(this);
     }
 
     handleClick(e){
-        e.stopPropagation();
-        let {nodeData}=this.props;
-        alert(nodeData.name);
+         e.stopPropagation();
+    }
+
+    handleDragEnd(e){
+    }
+
+    handleDragEnter(e){
+        e.target.style.color="red";
+    }
+
+
+    handleDragLeave(e){
+        e.target.style.color="black";
+    }
+
+    handleDragOver(e){
+        e.preventDefault();
     }
 
     handleDragStart(e){
@@ -30,40 +47,45 @@ class Node extends React.Component{
         let {nodeData}=this.props;
         e.dataTransfer.dropEffect="move";
         e.dataTransfer.setData("nodeId", nodeData.id);
-        console.log("handleDragStart");
-    }
-
-    handleDragEnd(e){
-        e.target.style.color = 'black';
-        e.preventDefault();
     }
 
     handleDrop(e) {
         e.stopPropagation();
-        var data = e.dataTransfer.getData("nodeId"); 
+        e.target.style.color="black";
+        root.printDepthFirstOrder();
+        const droppedNodeId = e.dataTransfer.getData("nodeId"); 
         console.log("handleDrop");
-        var foundOne = root.findDepthFirstOrder(data);
-        alert(foundOne.name+" is dropped! on "+this.props.nodeData.name);
+        
+        const droppedNode = root.findDepthFirstOrder(droppedNodeId);
+        const parentNode = droppedNode.parentNode;
+
+        const droppedNodeIndex = parentNode.children.indexOf(droppedNode); 
+        if(droppedNodeIndex > -1){
+            parentNode.children.splice(droppedNodeIndex,1);
+        }
+
+        droppedNode.parent = this.props.nodeData;
+        this.props.nodeData.children.push(droppedNode);
+        root.resetSeqOrder();
+        
+        this.props.r();
+        root.printDepthFirstOrder();
       }
-      
-    handleOnDragOver(e){
-        e.preventDefault();
-    }
-/* https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API
-Event	On Event Handler	Fires when…
-drag	ondrag	…a dragged item (element or text selection) is dragged.
-dragend	ondragend	…a drag operation ends (such as releasing a mouse button or hitting the Esc key; see Finishing a Drag.)
-dragenter	ondragenter	…a dragged item enters a valid drop target. (See Specifying Drop Targets.)
-dragexit	ondragexit	…an element is no longer the drag operation's immediate selection target.
-dragleave	ondragleave	…a dragged item leaves a valid drop target.
-dragover	ondragover	…a dragged item is being dragged over a valid drop target, every few hundred milliseconds.
-dragstart	ondragstart	…the user starts dragging an item. (See Starting a Drag Operation.)
-drop	ondrop	…an item is dropped on a valid drop target. (See Performing a Drop.)
- */
 
     render() {
         let {nodeData,childrenData}=this.props;
-        return <li draggable onClick={this.handleClick} onDragEnd={this.handleDragEnd} onDragOver={this.handleOnDragOver} onDragStart={this.handleDragStart} onDrop={this.handleDrop}>{nodeData.name}{childrenData}</li>
+
+        return <li  draggable 
+                   onClick={this.handleClick} 
+                   onDrag = {this.handleDrag}
+                   onDragEnd={this.handleDragEnd} 
+                   onDragEnter={this.handleDragEnter}
+                   onDragLeave={this.handleDragLeave}
+                   onDragOver={this.handleDragOver} 
+                   onDragStart={this.handleDragStart} 
+                   onDrop={this.handleDrop}>
+                       {nodeData.name}{childrenData}
+                </li>
       }
 }
 
@@ -71,11 +93,11 @@ class RootNode extends React.Component {
     renderNode=(nodeData)=>{
         if (nodeData.children.length>0) {
             return ( 
-                <Node nodeData={nodeData}  childrenData={<ul>{nodeData.children.map(item=> this.renderNode(item))}</ul>}/>
+                <Node r={this.props.r} key={nodeData.id} nodeData={nodeData}  childrenData={<ul>{nodeData.children.map(item=> this.renderNode(item))}</ul>}/>
             );
         }
         else {
-            return <Node nodeData={nodeData}/>;
+            return <Node r={this.props.r} key={nodeData.id} nodeData={nodeData}/>;
         }
     }
 
@@ -90,17 +112,18 @@ class NodeTree extends React.Component{
         let {rootData}=this.props;
         if(!rootData)
             return null;
-        return <ul>{rootData.children.map(rootNode=><RootNode nodeData={rootNode}/>)}</ul>;
+        return <ul>{rootData.children.map(rootNode=><RootNode r={this.props.r} nodeData={rootNode}/>)}</ul>;
       }
 }
 
 class DraggableCategory extends React.Component {
+
     render() {
         const root = this.props.root;
         if (!root) return;
         return (
             <div>
-                <NodeTree rootData={root}></NodeTree>
+                <NodeTree r={this.render} rootData={root}></NodeTree>
             </div>
         );
     }
